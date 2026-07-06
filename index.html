@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>PUZZLE</title>
+
+<style>
+body {
+    margin: 0;
+    background: #e6e6e6;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    margin: 16px 0 10px 0;
+    font-size: 28px;
+}
+
+button {
+    font-size: 16px;
+    padding: 6px 14px;
+}
+
+canvas {
+    background: #cccccc;
+    border: 1px solid #888;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 230px;
+    height: 44px;
+    background: transparent;
+    vertical-align: middle;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 14px;
+    background: #dddddd;
+    border: 1px solid #777777;
+    border-radius: 10px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 34px;
+    height: 34px;
+    margin-top: -11px;
+    background: #ffffff;
+    border: 2px solid #444444;
+    border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-track {
+    height: 14px;
+    background: #dddddd;
+    border: 1px solid #777777;
+    border-radius: 10px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 34px;
+    height: 34px;
+    background: #ffffff;
+    border: 2px solid #444444;
+    border-radius: 50%;
+}
+
+#zoneChoixImages {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+#imageReference {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 3px solid #444;
+    display: none;
+    background: #dddddd;
+}
+
+#galerie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-width: 680px;
+}
+
+#info {
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #003366;
+}
+
+#zoneLangueChat {
+    margin-top: 8px;
+    font-size: 16px;
+}
+
+#chatLangueChat {
+    cursor: pointer;
+    font-size: 24px;
+    margin-right: 8px;
+}
+
+#texteLangueChat {
+    visibility: hidden;
+}
+
+#boutonLangueChat.lisible #texteLangueChat {
+    visibility: visible;
+}
+
+
+#fenetreModeEmploi {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#contenuModeEmploi {
+    background: #ffffff;
+    color: #222222;
+    width: min(620px, 86vw);
+    max-height: 82vh;
+    overflow: auto;
+    text-align: left;
+    border: 2px solid #444444;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-size: 17px;
+    line-height: 1.45;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+
+#contenuModeEmploi h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+#contenuModeEmploi button {
+    display: block;
+    margin: 14px auto 0 auto;
+    font-size: 18px;
+    padding: 8px 18px;
+}
+
+
+#fenetreNouveauPuzzle {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#contenuNouveauPuzzle {
+    background: #ffffff;
+    color: #222222;
+    width: min(420px, 86vw);
+    text-align: center;
+    border: 2px solid #444444;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-size: 17px;
+    line-height: 1.45;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+
+#contenuNouveauPuzzle h2 {
+    margin-top: 0;
+}
+
+#contenuNouveauPuzzle button {
+    margin: 8px 6px 0 6px;
+    font-size: 17px;
+    padding: 8px 14px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>PUZZLE</h1>
+
+<button id="ouvrirImage">Choisir une photo</button>
+
+<div id="zoneChoixImages">
+    <img id="imageReference" alt="Image de référence">
+    <div id="galerie"></div>
+</div>
+
+<label style="margin-left:20px; font-size:16px;">
+
+Divisions :
+<input id="curseurDivisions"
+       type="range"
+       min="3"
+       max="20"
+       value="12">
+<span id="valeurDivisions">12</span>
+</label>
+
+<label style="margin-left:20px; font-size:16px;">
+
+Distorsion :
+<input id="curseurDistorsion" type="range" min="0" max="100" value="50">
+<span id="valeurDistorsion">50</span>
+</label>
+<button id="validerDistorsion">
+    Créer le puzzle
+</button>
+<button id="boutonNouveauPuzzle">
+    Nouveau puzzle
+</button>
+<button id="boutonSauvegarderPuzzle">
+    Sauvegarder
+</button>
+<button id="boutonReprendrePuzzle">
+    Reprendre le puzzle
+</button>
+<button id="boutonModeEmploi">
+    Mode d’emploi
+</button>
+
+<input
+    type="file"
+    id="choixImage"
+    accept="image/*"
+    style="display:none">
+
+<br><br>
+
+<canvas id="canvas" width="1200" height="850"></canvas>
+
+<div id="zoneLangueChat">
+    <span id="chatLangueChat" title="Langue au chat">🐱</span>
+    <button id="boutonLangueChat">
+        <span id="texteLangueChat">Coordonnées</span>
+    </button>
+</div>
+
+<div id="info">Choisissez une photo</div>
+
+<div id="fenetreModeEmploi">
+    <div id="contenuModeEmploi">
+        <h2>Mode d’emploi</h2>
+
+        <p><strong>Créer le puzzle :</strong></p>
+        <p>
+            1. Choisir une image ou importer une photo.<br>
+            2. Régler le nombre de lignes, de colonnes et la déformation.<br>
+            3. Cliquer sur « Créer le puzzle ».
+        </p>
+
+        <p><strong>Manipuler les pièces :</strong></p>
+        <p>
+            - Clic gauche / toucher : sélectionner une pièce.<br>
+            - Glisser : déplacer la pièce.<br>
+            - Touche R ou double clic / double tap : tourner la pièce.<br>
+            - Clic droit ou appui long : essayer de poser la pièce dans une case.<br>
+            - 🐱 on donne sa langue au chat et il affiche la position de la pièce sélectionnée.
+        </p>
+
+        <p>
+            Une pièce bien placée se remet droite, reprend sa vraie taille
+            et la bordure rouge de sa case disparaît.
+        </p>
+
+        <p><strong>Sauvegarder :</strong></p>
+        <p>
+            Le bouton « Sauvegarder » mémorise l’état du puzzle en cours.
+            Le bouton « Reprendre le puzzle » recharge la dernière sauvegarde
+            sur le même appareil et dans le même navigateur.
+        </p>
+
+        <button id="fermerModeEmploi">Fermer</button>
+    </div>
+</div>
+
+
+<div id="fenetreNouveauPuzzle">
+    <div id="contenuNouveauPuzzle">
+        <h2>Nouveau puzzle ?</h2>
+
+        <p>
+            La page sera entièrement réinitialisée,
+            comme si vous veniez d’ouvrir le jeu.
+        </p>
+
+        <button id="confirmerNouveauPuzzle">
+            Oui, réinitialiser
+        </button>
+
+        <button id="annulerNouveauPuzzle">
+            Annuler
+        </button>
+    </div>
+</div>
+
+
+<script>
+
+const CONFIG = {
+    divisions: 12,
+    distorsion: 50,
+    echelleVrac: 0.50,
+    tailleMinPieceVrac: 45,
+    marge: 30,
+    distorsionValidee: false
+};
+
+const CLE_SAUVEGARDE_PUZZLE = "puzzle_etat_en_cours_v1";
+
+const IMAGES_DEMO = [
+    { nom: "Wermer", fichier: "images/Wermer.jpg" },
+    { nom: "Astro Boy", fichier: "images/Astroboy.jpg" },
+    { nom: "Compagnon", fichier: "images/Compagnon.jpg" },
+    { nom: "Éléphant", fichier: "images/Elephant.png" },
+    { nom: "Fleur", fichier: "images/Fleur.jpg" },
+    { nom: "Vénus", fichier: "images/Venus.jpg" }
+];
+
+let NB_LIGNES;
+let NB_COLONNES;
+let LARGEUR_CASE;
+let HAUTEUR_CASE;
+let LARGEUR_IMAGE;
+let HAUTEUR_IMAGE;
+let X_IMAGE;
+let Y_IMAGE;
+
+let frontieresVerticales = {};
+let frontieresHorizontales = {};
+
+let pieces = [];
+let casesPosees = new Set();
+
+let pieceActive = null;
+let offsetX = 0;
+let offsetY = 0;
+let pieceEnDeplacement = false;
+let minuteurAppuiLong = null;
+let departAppuiLong = null;
+let appuiLongDeclenche = false;
+const DUREE_APPUI_LONG = 380;
+const DISTANCE_MAX_APPUI_LONG = 12;
+const DELAI_DOUBLE_TAP = 350;
+let dernierePieceTapee = null;
+let dernierTempsTap = 0;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.tabIndex = -1;
+
+function actionNeutreEcran() {
+
+    try {
+        canvas.focus({ preventScroll: true });
+    } catch (erreur) {
+        canvas.focus();
+    }
+}
+
+const bouton = document.getElementById("ouvrirImage");
+const choix = document.getElementById("choixImage");
+const imageReference = document.getElementById("imageReference");
+const curseurDivisions =
+    document.getElementById("curseurDivisions");
+const valeurDivisions =
+    document.getElementById("valeurDivisions");
+const curseurDistorsion = document.getElementById("curseurDistorsion");
+const valeurDistorsion = document.getElementById("valeurDistorsion");
+const boutonValiderDistorsion =
+    document.getElementById("validerDistorsion");
+const boutonNouveauPuzzle =
+    document.getElementById("boutonNouveauPuzzle");
+const boutonSauvegarderPuzzle =
+    document.getElementById("boutonSauvegarderPuzzle");
+const boutonReprendrePuzzle =
+    document.getElementById("boutonReprendrePuzzle");
+const boutonModeEmploi = document.getElementById("boutonModeEmploi");
+const fenetreModeEmploi = document.getElementById("fenetreModeEmploi");
+const fermerModeEmploi = document.getElementById("fermerModeEmploi");
+const fenetreNouveauPuzzle = document.getElementById("fenetreNouveauPuzzle");
+const confirmerNouveauPuzzle = document.getElementById("confirmerNouveauPuzzle");
+const annulerNouveauPuzzle = document.getElementById("annulerNouveauPuzzle");
+const info = document.getElementById("info");
+const chatLangueChat = document.getElementById("chatLangueChat");
+const boutonLangueChat = document.getElementById("boutonLangueChat");
+const texteLangueChat = document.getElementById("texteLangueChat");
+
+let imageActuelle = null;
+let imageSourceSauvegarde = null;
+let texteCoordonneesPiece = "";
+
+function creerSourceImageCompacte(image) {
+
+    const tailleMax = 1200;
+    const plusGrandCote = Math.max(image.width, image.height);
+    const ratio = Math.min(1, tailleMax / plusGrandCote);
+
+    const canvasImage = document.createElement("canvas");
+    canvasImage.width = Math.round(image.width * ratio);
+    canvasImage.height = Math.round(image.height * ratio);
+
+    const ctxImage = canvasImage.getContext("2d");
+
+    ctxImage.drawImage(
+        image,
+        0,
+        0,
+        canvasImage.width,
+        canvasImage.height
+    );
+
+    return canvasImage.toDataURL("image/jpeg", 0.86);
+}
+
+function coordonneesCanvas(event) {
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+
+function annulerAppuiLong() {
+    if (minuteurAppuiLong !== null) {
+        clearTimeout(minuteurAppuiLong);
+        minuteurAppuiLong = null;
+    }
+
+    departAppuiLong = null;
+}
+
+function demarrerAppuiLong(position) {
+    annulerAppuiLong();
+
+    departAppuiLong = position;
+    appuiLongDeclenche = false;
+
+    minuteurAppuiLong = setTimeout(function () {
+        minuteurAppuiLong = null;
+
+        if (pieceActive === null || pieceActive.posee) {
+            return;
+        }
+
+        appuiLongDeclenche = true;
+        pieceEnDeplacement = false;
+        validerPosePieceActive();
+    }, DUREE_APPUI_LONG);
+}
+
+bouton.onclick = function () {
+    choix.click();
+};
+
+function saisirPiece(event, piece) {
+
+    pieceActive = piece;
+    pieceEnDeplacement = true;
+
+    const position = coordonneesCanvas(event);
+
+    offsetX = position.x - piece.x;
+    offsetY = position.y - piece.y;
+
+    // équivalent de canvas.tag_raise :
+    const index = pieces.indexOf(piece);
+    if (index !== -1) {
+        pieces.splice(index, 1);
+        pieces.push(piece);
+    }
+
+}
+
+function trouverPieceCliquee(x, y) {
+
+    for (let i = pieces.length - 1; i >= 0; i--) {
+
+        const piece = pieces[i];
+
+        if (piece.posee) {
+            continue;
+        }
+
+        const echelle = echellePieceVrac(piece);
+        const largeur = piece.largeur * echelle;
+        const hauteur = piece.hauteur * echelle;
+
+        if (
+            x >= piece.x &&
+            x <= piece.x + largeur &&
+            y >= piece.y &&
+            y <= piece.y + hauteur
+        ) {
+            return piece;
+        }
+    }
+
+    return null;
+}
+
+function clicGaucheCanvas(event) {
+
+    if (event.button !== undefined && event.button !== 0) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const position = coordonneesCanvas(event);
+
+    const x = position.x;
+    const y = position.y;
+
+    const piece = trouverPieceCliquee(x, y);
+
+    if (piece !== null) {
+
+        const maintenant = Date.now();
+        const doubleTap =
+            dernierePieceTapee === piece &&
+            maintenant - dernierTempsTap <= DELAI_DOUBLE_TAP;
+
+        if (doubleTap) {
+            pieceActive = piece;
+            dernierePieceTapee = null;
+            dernierTempsTap = 0;
+            annulerAppuiLong();
+            pieceEnDeplacement = false;
+            tournerPieceActive();
+            return;
+        }
+
+        dernierePieceTapee = piece;
+        dernierTempsTap = maintenant;
+
+        saisirPiece(event, piece);
+
+        if (event.pointerId !== undefined) {
+            try {
+                canvas.setPointerCapture(event.pointerId);
+            } catch (erreur) {
+                // Certains navigateurs refusent la capture si le pointeur est déjà libéré.
+            }
+        }
+
+        if (event.pointerType === "touch" || event.pointerType === "pen") {
+            demarrerAppuiLong(position);
+        }
+
+        texteCoordonneesPiece =
+            "Pièce sélectionnée : ligne " +
+            (piece.ligOrigine + 1) +
+            ", colonne " +
+            (piece.colOrigine + 1);
+
+        texteLangueChat.textContent = texteCoordonneesPiece;
+        boutonLangueChat.classList.remove("lisible");
+
+        info.textContent = "Pièce sélectionnée";
+    }
+}
+
+function deplacerPiece(event) {
+
+    if (pieceActive === null || !pieceEnDeplacement) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const position = coordonneesCanvas(event);
+
+    if (departAppuiLong !== null) {
+        const dx = position.x - departAppuiLong.x;
+        const dy = position.y - departAppuiLong.y;
+
+        if (Math.sqrt(dx * dx + dy * dy) > DISTANCE_MAX_APPUI_LONG) {
+            annulerAppuiLong();
+        }
+    }
+
+    pieceActive.x = position.x - offsetX;
+    pieceActive.y = position.y - offsetY;
+
+    dessinerScene();
+}
+
+function tournerPieceActive() {
+
+    if (pieceActive === null) {
+        return;
+    }
+
+    if (pieceActive.posee) {
+        return;
+    }
+
+    pieceActive.rotation = (pieceActive.rotation + 30) % 360;
+
+    dessinerScene();
+
+    info.textContent =
+        "Rotation : " + pieceActive.rotation + "°";
+}
+
+function tournerPiece(event) {
+
+    if (event.key !== "r" && event.key !== "R") {
+        return;
+    }
+
+    tournerPieceActive();
+}
+
+function creerGalerie() {
+
+    const galerie = document.getElementById("galerie");
+
+    galerie.innerHTML = "";
+
+    for (const imageDemo of IMAGES_DEMO) {
+
+        const img = document.createElement("img");
+
+        img.src = imageDemo.fichier;
+
+        img.width = 100;
+        img.height = 100;
+
+        img.style.border = "2px solid #888";
+        img.style.margin = "4px";
+        img.style.cursor = "pointer";
+        img.style.objectFit = "cover";
+        img.onclick = function () {
+            const image = new Image();
+            image.onload = function () {
+                imageActuelle = image;
+                imageSourceSauvegarde = imageDemo.fichier;
+                imageReference.src = imageDemo.fichier;
+                imageReference.style.display = "inline-block";
+                afficherImage(image);
+                boutonValiderDistorsion.disabled = false;
+            };
+
+            image.src = imageDemo.fichier;
+        };
+
+        galerie.appendChild(img);
+    }
+}
+
+function nombreAleatoire(min, max) {
+    return min + Math.random() * (max - min);
+}
+
+function facteurAmplitude() {
+    const d = CONFIG.distorsion / 100;
+
+    const min = 0.08 + d * 0.17;
+    const max = 0.18 + d * 0.30;
+
+    return [min, Math.min(max, 0.48)];
+}
+
+function melangerPieces() {
+
+    for (let i = pieces.length - 1; i > 0; i--) {
+
+        const j = Math.floor(
+            Math.random() * (i + 1)
+        );
+
+        const temp = pieces[i];
+        pieces[i] = pieces[j];
+        pieces[j] = temp;
+    }
+}
+
+function frontiereVerticale(x, y1, y2, largeurCase) {
+    const h = y2 - y1;
+
+    const debut = nombreAleatoire(0.25, 0.40);
+    const pointe = nombreAleatoire(0.45, 0.55);
+    const fin = nombreAleatoire(0.60, 0.75);
+
+    const facteur = facteurAmplitude();
+    const amplitude = nombreAleatoire(facteur[0], facteur[1]) * largeurCase;
+    const sens = Math.random() < 0.5 ? -1 : 1;
+
+    return [
+        [x, y1],
+        [x, y1 + h * debut],
+        [x + sens * amplitude, y1 + h * pointe],
+        [x, y1 + h * fin],
+        [x, y2]
+    ];
+}
+
+function frontiereHorizontale(y, x1, x2, largeurCase) {
+    const l = x2 - x1;
+
+    const debut = nombreAleatoire(0.25, 0.40);
+    const pointe = nombreAleatoire(0.45, 0.55);
+    const fin = nombreAleatoire(0.60, 0.75);
+
+    const facteur = facteurAmplitude();
+    const amplitude = nombreAleatoire(facteur[0], facteur[1]) * largeurCase;
+    const sens = Math.random() < 0.5 ? -1 : 1;
+
+    return [
+        [x1, y],
+        [x1 + l * debut, y],
+        [x1 + l * pointe, y + sens * amplitude],
+        [x1 + l * fin, y],
+        [x2, y]
+    ];
+}
+
+function genererFrontieres() {
+    frontieresVerticales = {};
+    frontieresHorizontales = {};
+
+    for (let col = 1; col < NB_COLONNES; col++) {
+        const x = X_IMAGE + col * LARGEUR_CASE;
+
+        for (let lig = 0; lig < NB_LIGNES; lig++) {
+            const y1 = Y_IMAGE + lig * HAUTEUR_CASE;
+            const y2 = y1 + HAUTEUR_CASE;
+
+            frontieresVerticales[lig + "," + col] = frontiereVerticale(
+                x,
+                y1,
+                y2,
+                LARGEUR_CASE
+            );
+        }
+    }
+
+    for (let lig = 1; lig < NB_LIGNES; lig++) {
+        const y = Y_IMAGE + lig * HAUTEUR_CASE;
+
+        for (let col = 0; col < NB_COLONNES; col++) {
+            const x1 = X_IMAGE + col * LARGEUR_CASE;
+            const x2 = x1 + LARGEUR_CASE;
+
+            frontieresHorizontales[lig + "," + col] = frontiereHorizontale(
+                y,
+                x1,
+                x2,
+                LARGEUR_CASE
+            );
+        }
+    }
+}
+
+function tracerLigne(points) {
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+
+    for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i][0], points[i][1]);
+    }
+
+    ctx.stroke();
+}
+
+function cleCase(lig, col) {
+    return lig + "," + col;
+}
+
+function estCasePosee(lig, col) {
+    return casesPosees.has(cleCase(lig, col));
+}
+
+function dessinerFrontieres() {
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+
+    // Bords extérieurs : on dessine seulement les côtés des cases non posées.
+    for (let col = 0; col < NB_COLONNES; col++) {
+
+        if (!estCasePosee(0, col)) {
+            tracerLigne([
+                [X_IMAGE + col * LARGEUR_CASE, Y_IMAGE],
+                [X_IMAGE + (col + 1) * LARGEUR_CASE, Y_IMAGE]
+            ]);
+        }
+
+        if (!estCasePosee(NB_LIGNES - 1, col)) {
+            tracerLigne([
+                [X_IMAGE + (col + 1) * LARGEUR_CASE, Y_IMAGE + NB_LIGNES * HAUTEUR_CASE],
+                [X_IMAGE + col * LARGEUR_CASE, Y_IMAGE + NB_LIGNES * HAUTEUR_CASE]
+            ]);
+        }
+    }
+
+    for (let lig = 0; lig < NB_LIGNES; lig++) {
+
+        if (!estCasePosee(lig, 0)) {
+            tracerLigne([
+                [X_IMAGE, Y_IMAGE + (lig + 1) * HAUTEUR_CASE],
+                [X_IMAGE, Y_IMAGE + lig * HAUTEUR_CASE]
+            ]);
+        }
+
+        if (!estCasePosee(lig, NB_COLONNES - 1)) {
+            tracerLigne([
+                [X_IMAGE + NB_COLONNES * LARGEUR_CASE, Y_IMAGE + lig * HAUTEUR_CASE],
+                [X_IMAGE + NB_COLONNES * LARGEUR_CASE, Y_IMAGE + (lig + 1) * HAUTEUR_CASE]
+            ]);
+        }
+    }
+
+    // Frontières verticales internes :
+    // on ne les dessine que si les deux cases voisines ne sont pas déjà posées.
+    for (const cle in frontieresVerticales) {
+        const morceaux = cle.split(",");
+        const lig = Number(morceaux[0]);
+        const col = Number(morceaux[1]);
+
+        if (
+            !estCasePosee(lig, col - 1) &&
+            !estCasePosee(lig, col)
+        ) {
+            tracerLigne(frontieresVerticales[cle]);
+        }
+    }
+
+    // Frontières horizontales internes :
+    // on ne les dessine que si les deux cases voisines ne sont pas déjà posées.
+    for (const cle in frontieresHorizontales) {
+        const morceaux = cle.split(",");
+        const lig = Number(morceaux[0]);
+        const col = Number(morceaux[1]);
+
+        if (
+            !estCasePosee(lig - 1, col) &&
+            !estCasePosee(lig, col)
+        ) {
+            tracerLigne(frontieresHorizontales[cle]);
+        }
+    }
+}
+
+
+class Piece {
+    constructor(lig, col, contour) {
+        this.ligOrigine = lig;
+        this.colOrigine = col;
+        this.contour = contour;
+
+        this.x = 0;
+        this.y = 0;
+
+        this.rotation = 0;
+        this.posee = false;
+        this.selectionnee = false;
+
+        this.imageCanvas = null;
+        this.xmin = 0;
+        this.ymin = 0;
+        this.largeur = 0;
+        this.hauteur = 0;
+    }
+}
+
+function contourPiece(lig, col) {
+    const x1 = X_IMAGE + col * LARGEUR_CASE;
+    const y1 = Y_IMAGE + lig * HAUTEUR_CASE;
+    const x2 = x1 + LARGEUR_CASE;
+    const y2 = y1 + HAUTEUR_CASE;
+
+    let haut;
+    let droite;
+    let bas;
+    let gauche;
+
+    if (lig === 0) {
+        haut = [[x1, y1], [x2, y1]];
+    } else {
+        haut = frontieresHorizontales[lig + "," + col];
+    }
+
+    if (col === NB_COLONNES - 1) {
+        droite = [[x2, y1], [x2, y2]];
+    } else {
+        droite = frontieresVerticales[lig + "," + (col + 1)];
+    }
+
+    if (lig === NB_LIGNES - 1) {
+        bas = [[x2, y2], [x1, y2]];
+    } else {
+        bas = frontieresHorizontales[(lig + 1) + "," + col]
+            .slice()
+            .reverse();
+    }
+
+    if (col === 0) {
+        gauche = [[x1, y2], [x1, y1]];
+    } else {
+        gauche = frontieresVerticales[lig + "," + col]
+            .slice()
+            .reverse();
+    }
+
+    return haut
+        .concat(droite)
+        .concat(bas)
+        .concat(gauche);
+}
+
+function rotationAleatoire() {
+
+    const rotations = [
+          0,
+         30,
+         60,
+         90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330
+    ];
+
+    return rotations[
+        Math.floor(Math.random() * rotations.length)
+    ];
+}
+
+function creerPieces() {
+    pieces = [];
+    casesPosees = new Set();
+
+    for (let lig = 0; lig < NB_LIGNES; lig++) {
+        for (let col = 0; col < NB_COLONNES; col++) {
+            const contour = contourPiece(lig, col);
+
+            const piece = new Piece(lig, col, contour);
+
+            piece.rotation = rotationAleatoire();
+
+            pieces.push(piece);
+        }
+    }
+
+    info.textContent =
+        "Image : " + NB_COLONNES + " × " + NB_LIGNES +
+        " — Pièces créées : " + pieces.length;
+}
+
+function creerImagePiece(piece, image) {
+    const xs = piece.contour.map(p => p[0]);
+    const ys = piece.contour.map(p => p[1]);
+
+    const xmin = Math.floor(Math.min(...xs));
+    const ymin = Math.floor(Math.min(...ys));
+    const xmax = Math.ceil(Math.max(...xs));
+    const ymax = Math.ceil(Math.max(...ys));
+
+    const largeurPiece = xmax - xmin;
+    const hauteurPiece = ymax - ymin;
+
+    const canvasPiece = document.createElement("canvas");
+    canvasPiece.width = largeurPiece;
+    canvasPiece.height = hauteurPiece;
+
+    const ctxPiece = canvasPiece.getContext("2d");
+
+    ctxPiece.save();
+    ctxPiece.beginPath();
+
+    ctxPiece.moveTo(
+        piece.contour[0][0] - xmin,
+        piece.contour[0][1] - ymin
+    );
+
+    for (let i = 1; i < piece.contour.length; i++) {
+        ctxPiece.lineTo(
+            piece.contour[i][0] - xmin,
+            piece.contour[i][1] - ymin
+        );
+    }
+
+    ctxPiece.closePath();
+    ctxPiece.clip();
+
+    ctxPiece.drawImage(
+        image,
+        X_IMAGE - xmin,
+        Y_IMAGE - ymin,
+        LARGEUR_IMAGE,
+        HAUTEUR_IMAGE
+    );
+
+    ctxPiece.restore();
+
+    piece.imageCanvas = canvasPiece;
+    piece.xmin = xmin;
+    piece.ymin = ymin;
+    piece.largeur = largeurPiece;
+    piece.hauteur = hauteurPiece;
+}
+
+function decouperPieces(image) {
+    for (const piece of pieces) {
+        creerImagePiece(piece, image);
+    }
+}
+
+function echellePieceVrac(piece) {
+    let echelle = CONFIG.echelleVrac;
+
+    if (
+        piece.largeur * echelle < CONFIG.tailleMinPieceVrac ||
+        piece.hauteur * echelle < CONFIG.tailleMinPieceVrac
+    ) {
+        const echelleLargeur =
+            CONFIG.tailleMinPieceVrac / piece.largeur;
+
+        const echelleHauteur =
+            CONFIG.tailleMinPieceVrac / piece.hauteur;
+
+        echelle = Math.max(echelleLargeur, echelleHauteur);
+    }
+
+    return echelle;
+}
+
+function zoneVrac() {
+
+    const x = X_IMAGE + LARGEUR_IMAGE + 40;
+    const y = Y_IMAGE;
+    const largeur = canvas.width - x - CONFIG.marge;
+    const hauteur = canvas.height - y - CONFIG.marge;
+
+    return { x, y, largeur, hauteur };
+}
+
+function placerPiecesDansVrac() {
+
+    const zone = zoneVrac();
+
+    for (const piece of pieces) {
+
+        if (piece.posee) {
+            continue;
+        }
+
+        const echelle = echellePieceVrac(piece);
+
+        const largeur = piece.largeur * echelle;
+        const hauteur = piece.hauteur * echelle;
+
+        const xMin = zone.x;
+        const yMin = zone.y;
+        const xMax = zone.x + zone.largeur - largeur;
+        const yMax = zone.y + zone.hauteur - hauteur;
+
+        piece.x = nombreAleatoire(xMin, Math.max(xMin, xMax));
+        piece.y = nombreAleatoire(yMin, Math.max(yMin, yMax));
+    }
+}
+
+function afficherPiecesVrac() {
+
+    for (const piece of pieces) {
+
+        const echelle = piece.posee ? 1 : echellePieceVrac(piece);
+
+        const largeur = piece.largeur * echelle;
+        const hauteur = piece.hauteur * echelle;
+
+        ctx.save();
+
+        ctx.translate(
+            piece.x + largeur / 2,
+            piece.y + hauteur / 2
+        );
+
+        ctx.rotate(
+            piece.rotation * Math.PI / 180
+        );
+
+        ctx.drawImage(
+            piece.imageCanvas,
+            -largeur / 2,
+            -hauteur / 2,
+            largeur,
+            hauteur
+        );
+
+        ctx.restore();
+    }
+}
+
+function dessinerScene() {
+
+    if (imageActuelle === null) {
+        return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    dessinerFrontieres();
+    afficherDimensions();
+
+    for (const piece of pieces) {
+
+        const echelle = piece.posee ? 1 : echellePieceVrac(piece);
+
+        const largeur =
+            piece.largeur * echelle;
+
+        const hauteur =
+            piece.hauteur * echelle;
+
+        ctx.save();
+
+        ctx.translate(
+            piece.x + largeur / 2,
+            piece.y + hauteur / 2
+        );
+
+        ctx.rotate(
+            piece.rotation * Math.PI / 180
+        );
+
+        ctx.drawImage(
+            piece.imageCanvas,
+            -largeur / 2,
+            -hauteur / 2,
+            largeur,
+            hauteur
+        );
+
+        ctx.restore();
+    }
+}
+
+
+function tenterPosePiece(event) {
+    event.preventDefault();
+    validerPosePieceActive();
+}
+
+function validerPosePieceActive() {
+
+    annulerAppuiLong();
+
+    if (pieceActive === null) {
+        return;
+    }
+
+    if (pieceActive.posee) {
+        return;
+    }
+
+    const echelle = echellePieceVrac(pieceActive);
+
+    const centreX = pieceActive.x + (pieceActive.largeur * echelle) / 2;
+    const centreY = pieceActive.y + (pieceActive.hauteur * echelle) / 2;
+
+    const col = Math.floor((centreX - X_IMAGE) / LARGEUR_CASE);
+    const lig = Math.floor((centreY - Y_IMAGE) / HAUTEUR_CASE);
+
+    const bonneCase =
+        lig === pieceActive.ligOrigine &&
+        col === pieceActive.colOrigine;
+
+    if (bonneCase) {
+
+        pieceActive.x = pieceActive.xmin;
+        pieceActive.y = pieceActive.ymin;
+        pieceActive.rotation = 0;
+        pieceActive.posee = true;
+        casesPosees.add(cleCase(lig, col));
+
+        pieceEnDeplacement = false;
+        pieceActive = null;
+        texteCoordonneesPiece = "";
+        texteLangueChat.textContent = "Coordonnées";
+        boutonLangueChat.classList.remove("lisible");
+
+        dessinerScene();
+
+        info.textContent = "Pièce posée";
+
+    } else {
+
+        info.textContent =
+            "Mauvaise case";
+    }
+}
+
+function calculerDimensionsPuzzle(image, largeur, hauteur) {
+    if (image.width >= image.height) {
+        NB_COLONNES = CONFIG.divisions;
+        LARGEUR_CASE = largeur / NB_COLONNES;
+
+        NB_LIGNES = Math.round(hauteur / LARGEUR_CASE);
+        HAUTEUR_CASE = hauteur / NB_LIGNES;
+    } else {
+        NB_LIGNES = CONFIG.divisions;
+        HAUTEUR_CASE = hauteur / NB_LIGNES;
+
+        NB_COLONNES = Math.round(largeur / HAUTEUR_CASE);
+        LARGEUR_CASE = largeur / NB_COLONNES;
+    }
+}
+
+function afficherDimensions() {
+    ctx.fillStyle = "black";
+    ctx.font = "18px Arial";
+    ctx.fillText(
+        NB_COLONNES + " × " + NB_LIGNES,
+        20,
+        30
+    );
+}
+
+function afficherImage(image) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const marge = CONFIG.marge;
+
+    const largeurMax = canvas.width - 2 * marge - 360;
+    const hauteurMax = canvas.height - 2 * marge;
+
+    const ratioImage = image.width / image.height;
+    const ratioCadre = largeurMax / hauteurMax;
+
+    if (ratioImage > ratioCadre) {
+        LARGEUR_IMAGE = largeurMax;
+        HAUTEUR_IMAGE = LARGEUR_IMAGE / ratioImage;
+    } else {
+        HAUTEUR_IMAGE = hauteurMax;
+        LARGEUR_IMAGE = HAUTEUR_IMAGE * ratioImage;
+    }
+
+    X_IMAGE = CONFIG.marge;
+    Y_IMAGE = CONFIG.marge;
+
+    calculerDimensionsPuzzle(
+        image,
+        LARGEUR_IMAGE,
+        HAUTEUR_IMAGE
+    );
+
+    ctx.drawImage(
+        image,
+        X_IMAGE,
+        Y_IMAGE,
+        LARGEUR_IMAGE,
+        HAUTEUR_IMAGE
+    );
+    genererFrontieres();
+    dessinerFrontieres();
+
+    afficherDimensions();
+
+    info.textContent =
+        "Prévisualisation : " +
+        NB_COLONNES + " × " + NB_LIGNES;
+}
+
+function creerPuzzleDepuisImage(image) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const marge = CONFIG.marge;
+
+    const largeurMax = canvas.width - 2 * marge - 360;
+    const hauteurMax = canvas.height - 2 * marge;
+
+    const ratioImage = image.width / image.height;
+    const ratioCadre = largeurMax / hauteurMax;
+
+    if (ratioImage > ratioCadre) {
+        LARGEUR_IMAGE = largeurMax;
+        HAUTEUR_IMAGE = LARGEUR_IMAGE / ratioImage;
+    } else {
+        HAUTEUR_IMAGE = hauteurMax;
+        LARGEUR_IMAGE = HAUTEUR_IMAGE * ratioImage;
+    }
+
+    X_IMAGE = CONFIG.marge;
+    Y_IMAGE = CONFIG.marge;
+
+    calculerDimensionsPuzzle(
+        image,
+        LARGEUR_IMAGE,
+        HAUTEUR_IMAGE
+    );
+
+    genererFrontieres();
+    creerPieces();
+    decouperPieces(image);
+
+    melangerPieces();
+    placerPiecesDansVrac();
+
+    dessinerScene();
+
+    info.textContent =
+        "Image : " + NB_COLONNES + " × " + NB_LIGNES +
+        " — Pièces créées : " + pieces.length +
+        " — Pièces découpées : " + pieces.length;
+}
+
+curseurDivisions.oninput = function () {
+
+    if (CONFIG.distorsionValidee) {
+        return;
+    }
+
+    CONFIG.divisions = Number(curseurDivisions.value);
+
+    valeurDivisions.textContent = CONFIG.divisions;
+
+    if (imageActuelle !== null) {
+        afficherImage(imageActuelle);
+    }
+};
+
+curseurDistorsion.oninput = function () {
+
+    if (CONFIG.distorsionValidee) {
+        return;
+    }
+
+    CONFIG.distorsion = Number(curseurDistorsion.value);
+    valeurDistorsion.textContent = CONFIG.distorsion;
+
+    if (imageActuelle !== null) {
+        afficherImage(imageActuelle);
+    }
+};
+
+boutonValiderDistorsion.onclick = function () {
+
+    CONFIG.distorsionValidee = true;
+    curseurDistorsion.disabled = true;
+
+    if (imageActuelle !== null) {
+        creerPuzzleDepuisImage(imageActuelle);
+    }
+
+    info.textContent = "Distorsion validée — puzzle créé";
+};
+
+function preparerDimensionsPourReprise(image) {
+
+    const marge = CONFIG.marge;
+
+    const largeurMax = canvas.width - 2 * marge - 360;
+    const hauteurMax = canvas.height - 2 * marge;
+
+    const ratioImage = image.width / image.height;
+    const ratioCadre = largeurMax / hauteurMax;
+
+    if (ratioImage > ratioCadre) {
+        LARGEUR_IMAGE = largeurMax;
+        HAUTEUR_IMAGE = LARGEUR_IMAGE / ratioImage;
+    } else {
+        HAUTEUR_IMAGE = hauteurMax;
+        LARGEUR_IMAGE = HAUTEUR_IMAGE * ratioImage;
+    }
+
+    X_IMAGE = CONFIG.marge;
+    Y_IMAGE = CONFIG.marge;
+
+    calculerDimensionsPuzzle(
+        image,
+        LARGEUR_IMAGE,
+        HAUTEUR_IMAGE
+    );
+}
+
+function sauvegarderPuzzle() {
+
+    if (imageActuelle === null || pieces.length === 0) {
+        info.textContent = "Aucun puzzle à sauvegarder";
+        return;
+    }
+
+    let sourceImageCourante;
+
+    try {
+        sourceImageCourante = creerSourceImageCompacte(imageActuelle);
+        imageSourceSauvegarde = sourceImageCourante;
+    } catch (erreur) {
+        if (imageSourceSauvegarde !== null) {
+            sourceImageCourante = imageSourceSauvegarde;
+        } else {
+            info.textContent = "Image non sauvegardable";
+            return;
+        }
+    }
+
+    const donnees = {
+        version: 1,
+        date: new Date().toISOString(),
+        imageSource: sourceImageCourante,
+        config: {
+            divisions: CONFIG.divisions,
+            distorsion: CONFIG.distorsion,
+            echelleVrac: CONFIG.echelleVrac,
+            tailleMinPieceVrac: CONFIG.tailleMinPieceVrac,
+            marge: CONFIG.marge,
+            distorsionValidee: CONFIG.distorsionValidee
+        },
+        frontieresVerticales: frontieresVerticales,
+        frontieresHorizontales: frontieresHorizontales,
+        casesPosees: Array.from(casesPosees),
+        pieces: pieces.map(function (piece) {
+            return {
+                ligOrigine: piece.ligOrigine,
+                colOrigine: piece.colOrigine,
+                x: piece.x,
+                y: piece.y,
+                rotation: piece.rotation,
+                posee: piece.posee
+            };
+        })
+    };
+
+    try {
+        localStorage.setItem(
+            CLE_SAUVEGARDE_PUZZLE,
+            JSON.stringify(donnees)
+        );
+
+        info.textContent = "Puzzle sauvegardé";
+
+    } catch (erreur) {
+        info.textContent =
+            "Sauvegarde impossible : image trop lourde";
+    }
+}
+
+function reprendrePuzzleSauvegarde() {
+
+    const texte = localStorage.getItem(CLE_SAUVEGARDE_PUZZLE);
+
+    if (!texte) {
+        info.textContent = "Aucun puzzle sauvegardé";
+        return;
+    }
+
+    let donnees;
+
+    try {
+        donnees = JSON.parse(texte);
+    } catch (erreur) {
+        info.textContent = "Sauvegarde illisible";
+        return;
+    }
+
+    const image = new Image();
+
+    image.onload = function () {
+
+        CONFIG.divisions = donnees.config.divisions;
+        CONFIG.distorsion = donnees.config.distorsion;
+        CONFIG.echelleVrac = donnees.config.echelleVrac;
+        CONFIG.tailleMinPieceVrac = donnees.config.tailleMinPieceVrac;
+        CONFIG.marge = donnees.config.marge;
+        CONFIG.distorsionValidee = donnees.config.distorsionValidee;
+
+        curseurDivisions.value = CONFIG.divisions;
+        valeurDivisions.textContent = CONFIG.divisions;
+
+        curseurDistorsion.value = CONFIG.distorsion;
+        valeurDistorsion.textContent = CONFIG.distorsion;
+        curseurDistorsion.disabled = CONFIG.distorsionValidee;
+        boutonValiderDistorsion.disabled = false;
+
+        imageActuelle = image;
+        imageSourceSauvegarde = donnees.imageSource;
+        imageReference.src = donnees.imageSource;
+        imageReference.style.display = "inline-block";
+
+        preparerDimensionsPourReprise(image);
+
+        frontieresVerticales = donnees.frontieresVerticales;
+        frontieresHorizontales = donnees.frontieresHorizontales;
+
+        pieces = [];
+
+        for (const anciennePiece of donnees.pieces) {
+
+            const contour = contourPiece(
+                anciennePiece.ligOrigine,
+                anciennePiece.colOrigine
+            );
+
+            const piece = new Piece(
+                anciennePiece.ligOrigine,
+                anciennePiece.colOrigine,
+                contour
+            );
+
+            piece.x = anciennePiece.x;
+            piece.y = anciennePiece.y;
+            piece.rotation = anciennePiece.rotation;
+            piece.posee = anciennePiece.posee;
+
+            pieces.push(piece);
+        }
+
+        casesPosees = new Set(donnees.casesPosees);
+
+        decouperPieces(image);
+
+        pieceActive = null;
+        pieceEnDeplacement = false;
+        annulerAppuiLong();
+
+        texteCoordonneesPiece = "";
+        texteLangueChat.textContent = "Coordonnées";
+        boutonLangueChat.classList.remove("lisible");
+
+        dessinerScene();
+
+        info.textContent =
+            "Puzzle repris — pièces posées : " + casesPosees.size;
+    };
+
+    image.onerror = function () {
+        info.textContent = "Image sauvegardée introuvable";
+    };
+
+    image.src = donnees.imageSource;
+}
+
+function ouvrirFenetreNouveauPuzzle(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    fenetreNouveauPuzzle.style.display = "flex";
+}
+
+function fermerFenetreNouveauPuzzle(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    fenetreNouveauPuzzle.style.display = "none";
+}
+
+function nouveauPuzzle(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    fermerFenetreNouveauPuzzle();
+
+    // Réinitialisation complète : état JavaScript, canvas, curseurs,
+    // image importée, sélection, appui long, etc.
+    // On garde seulement la sauvegarde locale éventuelle,
+    // pour que « Reprendre le puzzle » reste possible après recharge.
+    window.location.reload();
+}
+
+boutonNouveauPuzzle.onclick = ouvrirFenetreNouveauPuzzle;
+boutonSauvegarderPuzzle.onclick = sauvegarderPuzzle;
+boutonReprendrePuzzle.onclick = reprendrePuzzleSauvegarde;
+confirmerNouveauPuzzle.onclick = nouveauPuzzle;
+annulerNouveauPuzzle.onclick = fermerFenetreNouveauPuzzle;
+
+fenetreNouveauPuzzle.addEventListener("pointerup", function (event) {
+    if (event.target === fenetreNouveauPuzzle) {
+        fermerFenetreNouveauPuzzle(event);
+    }
+});
+
+function ouvrirModeEmploi(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    fenetreModeEmploi.style.display = "flex";
+}
+
+function fermerFenetreModeEmploi(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    fenetreModeEmploi.style.display = "none";
+}
+
+boutonModeEmploi.onclick = ouvrirModeEmploi;
+boutonModeEmploi.addEventListener("pointerup", ouvrirModeEmploi);
+
+fermerModeEmploi.onclick = fermerFenetreModeEmploi;
+fermerModeEmploi.addEventListener("pointerup", fermerFenetreModeEmploi);
+
+fenetreModeEmploi.addEventListener("pointerup", function (event) {
+    if (event.target === fenetreModeEmploi) {
+        fermerFenetreModeEmploi(event);
+    }
+});
+
+choix.onchange = function (event) {
+    const fichier = event.target.files[0];
+
+    if (!fichier) return;
+
+    const lecteur = new FileReader();
+
+    lecteur.onload = function (lecture) {
+        const sourceImage = lecture.target.result;
+        const image = new Image();
+
+        image.onload = function () {
+            imageActuelle = image;
+            imageSourceSauvegarde = sourceImage;
+            imageReference.src = sourceImage;
+            imageReference.style.display = "inline-block";
+            afficherImage(image);
+            boutonValiderDistorsion.disabled = false;
+        };
+
+        image.src = sourceImage;
+    };
+
+    lecteur.readAsDataURL(fichier);
+};
+
+chatLangueChat.onclick = function () {
+    if (texteCoordonneesPiece === "") {
+        texteLangueChat.textContent = "Sélectionnez une pièce";
+    } else {
+        texteLangueChat.textContent = texteCoordonneesPiece;
+    }
+
+    boutonLangueChat.classList.add("lisible");
+};
+
+boutonLangueChat.onclick = function () {
+    return;
+};
+
+creerGalerie();
+canvas.addEventListener("pointerdown", clicGaucheCanvas);
+canvas.addEventListener("pointermove", deplacerPiece);
+canvas.addEventListener("pointerup", relacherPiece);
+canvas.addEventListener("pointercancel", relacherPiece);
+document.addEventListener("pointerup", function (event) {
+
+    if (
+        event.target.tagName === "INPUT" ||
+        event.target.tagName === "TEXTAREA" ||
+        event.target.tagName === "SELECT"
+    ) {
+        return;
+    }
+
+    setTimeout(actionNeutreEcran, 40);
+
+}, true);
+
+canvas.addEventListener("contextmenu", tenterPosePiece);
+document.addEventListener("keydown", tournerPiece);
+
+function relacherPiece(event) {
+
+    if (appuiLongDeclenche) {
+        event.preventDefault();
+
+        setTimeout(actionNeutreEcran, 20);
+
+        appuiLongDeclenche = false;
+    }
+
+    annulerAppuiLong();
+
+    if (pieceActive !== null && pieceEnDeplacement) {
+        event.preventDefault();
+    }
+
+    pieceEnDeplacement = false;
+
+    if (event.pointerId !== undefined) {
+        try {
+            canvas.releasePointerCapture(event.pointerId);
+        } catch (erreur) {
+            // Rien à faire : la capture peut déjà être libérée.
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>
