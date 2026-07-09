@@ -92,10 +92,32 @@ input[type="range"]::-moz-range-thumb {
 
 #galerie {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     align-items: center;
-    max-width: 680px;
+    gap: 8px;
+    width: max-content;
+    max-width: calc(100vw - 300px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 6px;
+    box-sizing: border-box;
+}
+
+#galerie img {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+    #zoneChoixImages {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #galerie {
+        width: 92vw;
+        max-width: 92vw;
+    }
 }
 
 #info {
@@ -344,7 +366,8 @@ const IMAGES_DEMO = [
     { nom: "Compagnon", fichier: "images/Compagnon.jpg" },
     { nom: "Éléphant", fichier: "images/Elephant.png" },
     { nom: "Fleur", fichier: "images/Fleur.jpg" },
-    { nom: "Vénus", fichier: "images/Venus.jpg" }
+    { nom: "Vénus", fichier: "images/Venus.jpg" },
+    { nom: "Bison", fichier: "images/Bison.jpg" }
 ];
 
 let NB_LIGNES;
