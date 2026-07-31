@@ -527,6 +527,9 @@ function saisirPiece(event, piece) {
         pieces.push(piece);
     }
 
+    // Le contour blanc disparaît seulement pendant le déplacement.
+    dessinerScene();
+
 }
 
 function trouverPieceCliquee(x, y) {
@@ -1123,6 +1126,42 @@ function placerPiecesDansVrac() {
     }
 }
 
+function tracerContourBlancPiece(piece, largeur, hauteur) {
+
+    if (
+        piece.posee ||
+        (piece === pieceActive && pieceEnDeplacement)
+    ) {
+        return;
+    }
+
+    const echelleX = largeur / piece.largeur;
+    const echelleY = hauteur / piece.hauteur;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        (piece.contour[0][0] - piece.xmin) * echelleX - largeur / 2,
+        (piece.contour[0][1] - piece.ymin) * echelleY - hauteur / 2
+    );
+
+    for (let i = 1; i < piece.contour.length; i++) {
+        ctx.lineTo(
+            (piece.contour[i][0] - piece.xmin) * echelleX - largeur / 2,
+            (piece.contour[i][1] - piece.ymin) * echelleY - hauteur / 2
+        );
+    }
+
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.70)";
+    // Trait de 2 px dessiné avant l’image : la moitié intérieure
+    // est ensuite recouverte, il ne reste donc qu’environ 1 px à l’extérieur.
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.stroke();
+}
+
 function afficherPiecesVrac() {
 
     for (const piece of pieces) {
@@ -1142,6 +1181,9 @@ function afficherPiecesVrac() {
         ctx.rotate(
             piece.rotation * Math.PI / 180
         );
+
+        // Le contour est tracé d’abord, puis l’image le recouvre à l’intérieur.
+        tracerContourBlancPiece(piece, largeur, hauteur);
 
         ctx.drawImage(
             piece.imageCanvas,
@@ -1186,6 +1228,9 @@ function dessinerScene() {
         ctx.rotate(
             piece.rotation * Math.PI / 180
         );
+
+        // Le contour est tracé d’abord, puis l’image le recouvre à l’intérieur.
+        tracerContourBlancPiece(piece, largeur, hauteur);
 
         ctx.drawImage(
             piece.imageCanvas,
@@ -1739,11 +1784,25 @@ function relacherPiece(event) {
 
     annulerAppuiLong();
 
-    if (pieceActive !== null && pieceEnDeplacement) {
+    const pieceEtaitDeplacee =
+        pieceActive !== null && pieceEnDeplacement;
+
+    if (pieceEtaitDeplacee) {
         event.preventDefault();
     }
 
     pieceEnDeplacement = false;
+
+    // Le contour avait été masqué pendant le déplacement.
+    // On redessine immédiatement la scène pour qu'il réapparaisse
+    // si la pièce vient d'être relâchée sans être posée.
+    if (
+        pieceEtaitDeplacee &&
+        pieceActive !== null &&
+        !pieceActive.posee
+    ) {
+        dessinerScene();
+    }
 
     if (event.pointerId !== undefined) {
         try {
