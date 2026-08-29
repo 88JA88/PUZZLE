@@ -1,4 +1,4 @@
-const CACHE_NAME = "puzzle-v3";
+const CACHE_NAME = "puzzle-v4";
 
 const FICHIERS_HORS_LIGNE = [
     "./",
